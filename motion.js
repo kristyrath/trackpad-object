@@ -28,6 +28,8 @@ function addMouseEventListeners() {
     })
     canvas.addEventListener('mousedown', (event) => {
         mouseIsDown = true;
+        var pixels = new Uint8Array(4);
+        selectPixel(event);
     })
     canvas.addEventListener('mouseup', (event) => {
         mouseIsDown = false;
@@ -83,4 +85,12 @@ function setRotationAngle() {
         }
 
     }
+}
+
+
+function selectPixel(event) {
+    var coord = getCurrentLocation(event);
+    var RGBA = new window.Uint8Array(4); 
+    gl.readPixels(coord[0], coord[1], 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, RGBA);
+    console.log(RGBA);
 }
