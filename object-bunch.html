@@ -10,8 +10,9 @@ Square Based Pyramid with clockwise or counter clockwise rotation and scale tran
     <title>Document</title>
 </head>
 <body>
+    <h3>To rotate: right click mouse + hold</h3>
+    <h3>To translate: press T + right click mouse + hold </h3>
     <canvas id="gl-canvas" width ="800" height="800"></canvas>
-   
     <script defer id="vertex-shader" type="x-shader/x-vertex">
         #version 300 es 
         precision mediump float; 
@@ -21,6 +22,8 @@ Square Based Pyramid with clockwise or counter clockwise rotation and scale tran
         uniform vec3 axisRotation; 
         uniform int objType;
         uniform int isClicked;
+        uniform float tx; 
+        uniform float ty; 
         void main() { 
             // Compute the sines and cosines of theta for each of 
             // the three axes in one computation. 
@@ -31,13 +34,11 @@ Square Based Pyramid with clockwise or counter clockwise rotation and scale tran
             float objID = float(gl_InstanceID);
             float objCol = float(gl_InstanceID%5);
             float objRow = float(gl_InstanceID%5);
-            float shiftX = float(((objCol) * 0.35) - 0.6);
-            float shiftY = 0.0;
+            float shiftX = float(((objCol) * 0.35) - 0.6) + tx;
+            float shiftY = float(objType) * -0.35 + ty;
+            
+    
 
-           
-            shiftY = float(objType) * -0.35;
-           
-       
             // column-major 
             mat4 rx = mat4( 
                 1.0,  0.0,  0.0, 0.0,
@@ -66,7 +67,7 @@ Square Based Pyramid with clockwise or counter clockwise rotation and scale tran
                 shiftX, shiftY, 0.0, 1.0);
             mat4 rotationMat = rx * ry * rz;
 
-                vColor = aColor; 
+            vColor = aColor; 
             
             vec4 new_pos = aPosition; 
             
@@ -94,3 +95,9 @@ Square Based Pyramid with clockwise or counter clockwise rotation and scale tran
 
 </body>
 </html>
+
+
+
+<!-- 
+shiftX = shiftX + tx;
+shiftY = shiftY + ty; -->

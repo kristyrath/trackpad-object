@@ -15,7 +15,13 @@ var axisRotationLoc;
 var isClicked = 0;
 var cBuffer;
 var vBuffer;
-var program
+var program;
+
+
+var tx = 0;
+var ty = 0;
+var txLoc;
+var tyLoc;
 window.onload = function init()
 {
     canvas = document.getElementById("gl-canvas");
@@ -32,6 +38,8 @@ window.onload = function init()
     loadSquarePyramid(); 
     loadTrianglePyramid();
     loadCube();
+
+
 
     //  Load shaders and initialize attribute buffers
 
@@ -64,21 +72,42 @@ window.onload = function init()
     gl.vertexAttribPointer(positionLoc, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(positionLoc );
 
+    txLoc = gl.getUniformLocation(program, 'tx');
+    tyLoc = gl.getUniformLocation(program, 'ty');
     objTypeLoc = gl.getUniformLocation(program, "objType");
     axisRotationLoc = gl.getUniformLocation(program, "axisRotation");
     oldThetaLoc = gl.getUniformLocation(program, "oldTheta");
-    //event listeners for buttons
 
     addMouseEventListeners();
+    addKeyEventListener();
     render();
 }
 
 
 function render()
 {
+    console.log("TRANSLATE", translate)
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    setRotationAngle();
+
+    if (translate & mouseIsDown & isDragging) {
+        // setTranslationFactor(currentLocation, previousLocation);
+        tx += txFactor;
+        ty += tyFactor;
+        console.log("tx", tx);
+        console.log("ty", ty);
+        txFactor = 0;
+        tyFactor = 0;
+        
+    }
+    else {
+        setRotationAngle(currentLocation, previousLocation);
+
+    }
+  
+    gl.uniform1f(txLoc, tx);
+    gl.uniform1f(tyLoc, ty);
     gl.uniform3fv(axisRotationLoc, axisRotation);
+
     objType = 0;
     gl.uniform1i(objTypeLoc, objType);
     gl.drawElementsInstanced(gl.TRIANGLES, numPointsSquarePyramid, gl.UNSIGNED_BYTE, 0,  numInstances);
@@ -91,10 +120,6 @@ function render()
     gl.uniform1i(objTypeLoc, objType);
     gl.drawElementsInstanced(gl.TRIANGLES, numPointsCube, gl.UNSIGNED_BYTE, 30,  numInstances);
 
-
-    // gl.drawElementsInstanced(gl.TRIANGLES, numTrianglePyramid, gl.UNSIGNED_BYTE, ,  numInstances);
-
     requestAnimationFrame(render);
-
 }
 

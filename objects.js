@@ -7,7 +7,6 @@ function loadSquarePyramid() {
         vec3(-0.5, 0.0, -0.5),
         vec3(-0.5, 0.0, 0.5)
     ];
-    
     var vertexColors = [
         vec4(0.0, 0.0, 0.0, 1.0),  // black
         vec4(1.0, 0.0, 0.0, 1.0),  // red
@@ -18,7 +17,6 @@ function loadSquarePyramid() {
         vec4(0.0, 1.0, 1.0, 1.0),  // cyan
         vec4(1.0, 1.0, 1.0, 1.0)   // white
     ];
-    
     var sqIndices = [
         0, 1, 2,
         2, 3, 0,
@@ -56,7 +54,6 @@ function loadTrianglePyramid() {
     ];
 
     var numVert = vertices.length;
-
     loadVertexColors(vertexColors);
     loadVertices(vertices);
     loadIndices(tpIndices, numVert);
@@ -108,7 +105,6 @@ function loadCube() {
     loadIndices(cIndices, numVert);
 }
 
-
 function loadVertexColors(objVertexColors) {
     for ( var i = 0; i < objVertexColors.length; ++i ) {
         // var randIndex = Math.floor(Math.random() * objVertexColors.length);
@@ -126,7 +122,6 @@ function loadVertices(objVertices) {
 }
 function loadIndices(objIndices, objNumVertices) {
     if (positions) {
-
         var lastIndex = 0;
         if (indices.length != 0) {
             lastIndex = objNumVertices + 1;
