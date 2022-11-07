@@ -5,7 +5,7 @@ var newX = 0.3;
 var newY = 0.3;
 
 var currentLocation;
-var previousLocation; 
+var previousLocation = []; 
 
 var mouseIsDown = false;
 var isDragging = false;
@@ -24,42 +24,56 @@ var translate = false;
 var shiftX;
 var shiftY;
 
-var txFactor;
-var tyFactor;
+var txFactor=0;
+var tyFactor=0;
+
+var pickedObjID;
+var objChangeColor = [];
+
 function addMouseEventListeners() {
     
     canvas.addEventListener('mousemove', (event) => {
 
-        previousLocation = currentLocation;
-        currentLocation = getCurrentLocation(event);
+        previousLocation[pickedObjID] = currentLocation;
+        currentLocation = getCurrentLocation(event, 'center-origin');
         isDragging = true;
         // determine whether to translate or rotate the object
         if (mouseIsDown & isDragging) {
             if (translate) {
-                var xyArr = calcTranlationXY(currentLocation, previousLocation);
+                var xyArr = calcTranlationXY(currentLocation, previousLocation[pickedObjID]);
                 txFactor = xyArr[0];
                 tyFactor = xyArr[1]; 
-                // console.log("txFactor: ", txFactor);
-                // console.log("tyFactor: ", tyFactor);
+                console.log("xyArr: ", xyArr);
+                console.log("txFactor: ", txFactor);
+                console.log("tyFactor: ", tyFactor);
             }
             else {
-                dragMotion(currentLocation, previousLocation);
+                if (previousLocation[pickedObjID] == null) {
+                    previousRLocation[pickedObjID] = [currentLocation[0], currentLocation[1], 0];
+                }
+                dragMotion(currentLocation, previousLocation, pickedObjID);
+
             }
         }
     })
     canvas.addEventListener('mousedown', (event) => {
         mouseIsDown = true;
-        var pixels = new Uint8Array(4);
-        selectPixel(event);
+        render(); //???
+        let id = getIdFromColor(event);
+        pickedObjID = id;
     })
     canvas.addEventListener('mouseup', (event) => {
         mouseIsDown = false;
         isDragging = false;
+        pickedObjID = null;
+    })
+    canvas.addEventListener('dblclick', () => {
+        changeObjColor(pickedObjID);
     })
 }
 function addKeyEventListener(){
     document.addEventListener('keydown', (event) => {
-        if (event.key === 't') {
+        if (event.key === 't' || event.key === 'T' ) {
             translate = true;
         }
     }) 
@@ -67,16 +81,15 @@ function addKeyEventListener(){
         translate = false;
     }) 
 }
-function dragMotion(currentLocation, previousLocation) {
+function dragMotion(currentLocation, previousLocation, objID) {
     previousAngleX = angleX;
     previousAngleY = angleY;
     // // calculate distance
-    // var normalVec = [currentLocation[0] - previousLocation[0], currentLocation[1] - previousLocation[1]];
     newX = currentLocation[0];
     newY = currentLocation[1];
 
     // calc speed of rotation 
-    var axisSpeed = calcRotationSpeedXY(currentLocation, previousLocation);
+    var axisSpeed = calcRotationSpeedXY(currentLocation, previousLocation[objID]);
     var dx = axisSpeed[0];
     var dy = axisSpeed[1];
     // calc angle of rotation 
@@ -101,45 +114,57 @@ function calcRotationSpeedXY(currentLocation, previousLocation) {
     var dy = speed * (currentLocation[1] - previousLocation[1]);
     return [dx, dy];
 }
-function getCurrentLocation(event) {
+function getCurrentLocation(event, plane_type) {
     let currentX = event.clientX;
     let currentY = event.clientY;
-
 
     let canvasHeight = canvas.height;
     let canvasWidth = canvas.width;
 
-    // ???
-    var x = ((2*currentX) / canvasWidth) - 1
-    var y = (2*(canvasHeight-currentY)/canvasHeight)-1;
+    var x;
+    var y;
+    switch(plane_type) {
+        case ('center-origin'):
+            x = ((2*currentX) / canvasWidth) - 1
+            y = (2*(canvasHeight-currentY)/canvasHeight)-1;
+        break;
+        case ('lower-left-origin'):
+            let container = canvas.getBoundingClientRect();
+            // gets coordinates of mouse position relative to canvas
+            let canvasRelX = currentX - container.left;
+            let canvasRelY = currentY - container.top;
+            // gets coordinates of 
+            x = canvasRelX;
+            // flip y coordinate from top left origin to lower left origin
+            y = canvasHeight - canvasRelY;
 
-    return [x, y];
-    
-}
-
-function setRotationAngle(currentLocation, previousLocation) {
-    if (isDragging & mouseIsDown) {
-        if (angleX != previousAngleX) {
-            axisRotation[0] = -angleX;
-        }
-        if (angleY != previousAngleY) {
-            axisRotation[1] = angleY;
-        }
+        break;
     }
+    return [x, y];
 }
-// function setTranslationFactor(currentLocation, previousLocation) {
-//     if (isDragging & mouseIsDown & translate) {
-//         let xy = calcTranlationXY(currentLocation, previousLocation);
-//         tx = xy[0];
-//         ty = xy[1];
-//         console.log("tx: ", tx);
-//         console.log("ty: ", ty);
-//     }
-// }
 
-function selectPixel(event) {
-    var coord = getCurrentLocation(event);
-    var RGBA = new window.Uint8Array(4); 
-    gl.readPixels(coord[0], coord[1], 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, RGBA);
+function getRotationAngle(objID) {
+    var rArray = objCurrentRxRy[objID];
+
+    if (isDragging & mouseIsDown) {
+        if (angleX != rArray[0]) {
+            rArray[0] = -angleX;
+        }
+        if (angleY != rArray[1]) {
+            rArray[1] = angleY;
+        }
+        rArray[2] = 0;
+    }
+    return rArray;
+}
+
+
+function changeObjColor(pickedObjID) {
+    if (objChangeColor[pickedObjID] == null || objChangeColor[pickedObjID] == 1 ) {
+        objChangeColor[pickedObjID] = 0;
+    }
+    else {
+        objChangeColor[pickedObjID] = 1;
+    }
 }
 

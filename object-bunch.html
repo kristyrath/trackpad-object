@@ -10,9 +10,15 @@ Square Based Pyramid with clockwise or counter clockwise rotation and scale tran
     <title>Document</title>
 </head>
 <body>
-    <h3>To rotate: right click mouse + hold</h3>
-    <h3>To translate: press T + right click mouse + hold </h3>
-    <canvas id="gl-canvas" width ="800" height="800"></canvas>
+
+    <canvas id="gl-canvas" width ="500" height="500"></canvas>
+    <div>
+        <span>To rotate: right click mouse + hold</span><br>
+        <span>To translate: press T + right click mouse + hold </span><br>
+        <span>To change color: double click </span><br><br>
+        <span>Kristy Rath 0707345</span>
+    </div>
+
     <script defer id="vertex-shader" type="x-shader/x-vertex">
         #version 300 es 
         precision mediump float; 
@@ -24,20 +30,97 @@ Square Based Pyramid with clockwise or counter clockwise rotation and scale tran
         uniform int isClicked;
         uniform float tx; 
         uniform float ty; 
+        uniform float sc;
+        uniform int objID;
         void main() { 
             // Compute the sines and cosines of theta for each of 
             // the three axes in one computation. 
             vec3 angles = radians(axisRotation); 
             vec3 c = cos(angles); 
             vec3 s = sin(angles); 
-            float uScale = 0.25;
-            float objID = float(gl_InstanceID);
-            float objCol = float(gl_InstanceID%5);
-            float objRow = float(gl_InstanceID%5);
-            float shiftX = float(((objCol) * 0.35) - 0.6) + tx;
+            float uScale = sc;
+            float shiftX = (float(objID%3) * 0.35) - 0.6 + tx;
             float shiftY = float(objType) * -0.35 + ty;
             
-    
+            
+
+            // column-major 
+            mat4 rx = mat4( 
+                1.0,  0.0,  0.0, 0.0,
+                0.0,  c.x,  s.x, 0.0,
+                0.0, -s.x,  c.x, 0.0,
+                0.0,  0.0,  0.0, 1.0 );
+            mat4 ry = mat4( 
+                    c.y, 0.0, -s.y, 0.0,
+                    0.0, 1.0,  0.0, 0.0,
+                    s.y, 0.0,  c.y, 0.0,
+                    0.0, 0.0,  0.0, 1.0 );
+            mat4 rz = mat4( 
+                c.z, s.z, 0.0, 0.0,
+                -s.z,  c.z, 0.0, 0.0,
+                0.0,  0.0, 1.0, 0.0,
+                0.0,  0.0, 0.0, 1.0 );
+            mat4 scaleMat = mat4(
+                uScale, 0.0, 0.0, 0.0,
+                0.0, uScale, 0.0, 0.0,
+                0.0, 0.0, uScale, 0.0, 
+                0.0, 0.0, 0.0, 1.0); 
+            mat4 translationMat = mat4(
+                1, 0.0, 0.0, 0.0,
+                0.0, 1, 0.0, 0.0,
+                0.0, 0.0, 1, 0.0,
+                shiftX, shiftY, 0.0, 1.0);
+            mat4 rotationMat = rx * ry * rz;
+
+            vColor = aColor; 
+            
+            vec4 new_pos = aPosition; 
+            
+            // apply rotation and transformation matrix along the y axis
+            gl_Position =  translationMat * scaleMat * rotationMat * new_pos; 
+            gl_Position.z = -gl_Position.z; 
+        
+        }
+    </script>
+    <script defer id="fragment-shader" type="x-shader/x-fragment">
+        #version 300 es 
+        precision mediump float; 
+        in vec4 vColor; 
+        out vec4 fColor;
+        uniform int changeColor;
+        void main() {
+          if (changeColor == 1) {
+            fColor = vec4(0.5, 0, 0, 1.0);
+          }
+          else {
+            fColor = vColor;
+          }
+        }
+    </script>
+ <script defer id="s-vertex-shader" type="x-shader/x-vertex">
+        #version 300 es 
+        precision mediump float; 
+        in vec4 aPosition; 
+        in vec4 aColor; 
+        out vec4 vColor; 
+        uniform vec3 axisRotation; 
+        uniform int objType;
+        uniform int isClicked;
+        uniform float tx; 
+        uniform float ty; 
+        uniform float sc;
+        uniform int objID;
+        void main() { 
+            // Compute the sines and cosines of theta for each of 
+            // the three axes in one computation. 
+            vec3 angles = radians(axisRotation); 
+            vec3 c = cos(angles); 
+            vec3 s = sin(angles); 
+            float uScale = sc;
+            float shiftX = (float(objID%3) * 0.35) - 0.6 + tx;
+            float shiftY = float(objType) * -0.35 + ty;
+            
+            
 
             // column-major 
             mat4 rx = mat4( 
@@ -76,15 +159,15 @@ Square Based Pyramid with clockwise or counter clockwise rotation and scale tran
             gl_Position.z = -gl_Position.z; 
         }
     </script>
-    <script defer id="fragment-shader" type="x-shader/x-fragment">
+    <script defer id="s-fragment-shader" type="x-shader/x-fragment">
         #version 300 es 
         precision mediump float; 
-        in vec4 vColor; 
+        in vec4 vColor;
         out vec4 fColor;
-        uniform float u_time;
-        
+        uniform int id;
         void main() {
-          fColor = vColor;
+            float red = float(id) / 255.0;
+            fColor = vec4(red, 0, 0, 1.0);
         }
     </script>
     <script defer src ="Common/initShaders.js"></script>
@@ -92,6 +175,7 @@ Square Based Pyramid with clockwise or counter clockwise rotation and scale tran
     <script defer src="object-bunch.js"></script>
     <script defer src="objects.js"></script>
     <script defer src="motion.js"></script>
+    <script defer src="picking.js"></script>
 
 </body>
 </html>

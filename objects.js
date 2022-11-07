@@ -1,5 +1,5 @@
 
-function loadSquarePyramid() {
+function loadSquarePyramid(numElements) {
     var vertices = [
         vec3(0.0, 0.7, 0.0),
         vec3(0.5, 0.0, 0.5),
@@ -32,7 +32,7 @@ function loadSquarePyramid() {
 }
 
 
-function loadTrianglePyramid() {
+function loadTrianglePyramid(numElements) {
     var tpIndices = [
         0, 1, 2, 
         2, 3, 0, 
@@ -59,7 +59,7 @@ function loadTrianglePyramid() {
     loadIndices(tpIndices, numVert);
 }
 
-function loadCube() {
+function loadCube(numElements) {
     var vertices = [
         vec3(-0.5, -0.5,  0.5),
         vec3(-0.5,  0.5,  0.5),
@@ -105,11 +105,14 @@ function loadCube() {
     loadIndices(cIndices, numVert);
 }
 
-function loadVertexColors(objVertexColors) {
+function loadVertexColors(objVertexColors, numElements) {
     for ( var i = 0; i < objVertexColors.length; ++i ) {
-        // var randIndex = Math.floor(Math.random() * objVertexColors.length);
-        // console.log(randIndex)
-        colors.push( objVertexColors[i] );
+        if(currentProgram === mainProgram) {
+            colors.push( objVertexColors[i]);
+        }
+        else {
+            colors.push(vec4(1.0, 0.0, 0.0, 1.0));
+        }
     }
     
 }
