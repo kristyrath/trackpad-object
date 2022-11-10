@@ -31,7 +31,6 @@ var pickedObjID;
 var objChangeColor = [];
 
 function addMouseEventListeners() {
-    
     canvas.addEventListener('mousemove', (event) => {
 
         previousLocation[pickedObjID] = currentLocation;
@@ -58,17 +57,23 @@ function addMouseEventListeners() {
     })
     canvas.addEventListener('mousedown', (event) => {
         mouseIsDown = true;
-        render(); //???
-        let id = getIdFromColor(event);
-        pickedObjID = id;
+        // render(); //???
+        // let id = getIdFromColor(event);
+        // pickedObjID = id;
+        pickedObjID = document.getElementById("options").value;
+
     })
     canvas.addEventListener('mouseup', (event) => {
         mouseIsDown = false;
         isDragging = false;
         pickedObjID = null;
     })
-    canvas.addEventListener('dblclick', () => {
-        changeObjColor(pickedObjID);
+    canvas.addEventListener('dblclick', (event) => {
+        console.log("double clicked");
+        swapColors = true;
+        // let id = getIdFromColor(event);
+        // pickedObjID = id;
+        // changeObjColor(pickedObjID);
     })
 }
 function addKeyEventListener(){
@@ -158,13 +163,40 @@ function getRotationAngle(objID) {
     return rArray;
 }
 
-
-function changeObjColor(pickedObjID) {
-    if (objChangeColor[pickedObjID] == null || objChangeColor[pickedObjID] == 1 ) {
-        objChangeColor[pickedObjID] = 0;
-    }
-    else {
-        objChangeColor[pickedObjID] = 1;
-    }
+function calcPositionMat(translationMat, scaleMat, rotationMat, positionMat) {
+    var finalPosition = mult(translationMat, positionMat);
+    finalPosition = mult(finalPosition, rotationMat);
+    finalPosition = mult(finalPosition, scaleMat);
+    return finalPosition;
 }
 
+function calcTranslationMat(tx, ty, objID, objType) {
+    var shiftX = (objID % 4)* 0.45 - 0.65 + tx;
+    var shiftY = (objType-1) * -0.55 + ty;
+     
+    var translationMat = mat4(
+        1, 0.0, 0.0, 0.0,
+        0.0, 1, 0.0, 0.0,
+        0.0, 0.0, 1, 0.0,
+        shiftX, shiftY, 0.0, 1.0);
+    return translationMat;
+}
+function calcRotationMat(axisRotation) {
+    
+    // var angles = radians(axisRotation);
+    // var c = vec3(Math.cos(angles)); 
+    // var s = Math.sin(angles); 
+    var rx = rotateX(axisRotation);
+    var ry = rotateX(axisRotation);
+    var rz = rotateX(axisRotation);
+    var rotationMat = mult(mult(rx * ry), rz);
+    return rotationMat;
+}
+function calcScaleMat(sc) {
+    var scaleMat = mat4(
+        sc, 0.0, 0.0, 0.0,
+        0.0, sc, 0.0, 0.0,
+        0.0, 0.0, sc, 0.0, 
+        0.0, 0.0, 0.0, 1.0); 
+    return scaleMat;
+}

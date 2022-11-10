@@ -1,21 +1,11 @@
 
-function loadSquarePyramid(numElements) {
+function loadSquarePyramid() {
     var vertices = [
         vec3(0.0, 0.7, 0.0),
         vec3(0.5, 0.0, 0.5),
         vec3(0.5, 0.0, -0.5),
         vec3(-0.5, 0.0, -0.5),
         vec3(-0.5, 0.0, 0.5)
-    ];
-    var vertexColors = [
-        vec4(0.0, 0.0, 0.0, 1.0),  // black
-        vec4(1.0, 0.0, 0.0, 1.0),  // red
-        vec4(1.0, 1.0, 0.0, 1.0),  // yellow
-        vec4(0.0, 1.0, 0.0, 1.0),  // green
-        vec4(0.0, 0.0, 1.0, 1.0),  // blue
-        vec4(1.0, 0.0, 1.0, 1.0),  // magenta
-        vec4(0.0, 1.0, 1.0, 1.0),  // cyan
-        vec4(1.0, 1.0, 1.0, 1.0)   // white
     ];
     var sqIndices = [
         0, 1, 2,
@@ -26,13 +16,13 @@ function loadSquarePyramid(numElements) {
         4, 1, 2
     ];
     var numVert = vertices.length;
-    loadVertexColors(vertexColors);
+    loadVertexColors(colorList[3], 5, 0); // l
     loadVertices(vertices);
     loadIndices(sqIndices, numVert);
 }
 
 
-function loadTrianglePyramid(numElements) {
+function loadTrianglePyramid() {
     var tpIndices = [
         0, 1, 2, 
         2, 3, 0, 
@@ -46,15 +36,8 @@ function loadTrianglePyramid(numElements) {
         vec3(-0.3, 0.0, -0.2)
     ];
 
-    var vertexColors = [
-        vec4(0.0, 0.0, 1.0, 1.0),  // blue
-        vec4(1.0, 0.0, 1.0, 1.0),  // magenta
-        vec4(0.0, 1.0, 1.0, 1.0),  // cyan
-        vec4(1.0, 1.0, 1.0, 1.0)   // white
-    ];
-
     var numVert = vertices.length;
-    loadVertexColors(vertexColors);
+    loadVertexColors(colorList[2], 9, 4);
     loadVertices(vertices);
     loadIndices(tpIndices, numVert);
 }
@@ -71,17 +54,6 @@ function loadCube(numElements) {
         vec3(0.5, -0.5, -0.5)
     ];
     
-    var vertexColors = [
-        vec4(0.0, 0.0, 0.0, 1.0),  // black
-        vec4(1.0, 0.0, 0.0, 1.0),  // red
-        vec4(1.0, 1.0, 0.0, 1.0),  // yellow
-        vec4(0.0, 1.0, 0.0, 1.0),  // green
-        vec4(0.0, 0.0, 1.0, 1.0),  // blue
-        vec4(1.0, 0.0, 1.0, 1.0),  // magenta
-        vec4(1.0, 1.0, 1.0, 1.0),  // white
-        vec4(0.0, 1.0, 1.0, 1.0)   // cyan
-    ];
-
     var cIndices = [
 
         1, 0, 3,
@@ -100,19 +72,20 @@ function loadCube(numElements) {
 
     var numVert = vertices.length;
 
-    loadVertexColors(vertexColors);
+    loadVertexColors(colorList[1], 17, 9);
     loadVertices(vertices);
     loadIndices(cIndices, numVert);
 }
 
-function loadVertexColors(objVertexColors, numElements) {
-    for ( var i = 0; i < objVertexColors.length; ++i ) {
-        if(currentProgram === mainProgram) {
-            colors.push( objVertexColors[i]);
-        }
-        else {
-            colors.push(vec4(1.0, 0.0, 0.0, 1.0));
-        }
+function loadVertexColors(objVertexColors, numVertexColors, offset) {
+    let j = 0;
+    for (var i = offset; i < numVertexColors; ++i ) {
+        colors[i] = objVertexColors[j];
+        j++;
+        // if(currentProgram === mainProgram) {
+        //     colors.push( objVertexColors[i]);
+        // }
+
     }
     
 }
@@ -137,3 +110,7 @@ function loadIndices(objIndices, objNumVertices) {
         console.log("ERROR: LOAD VERTICES FIRST.");
     }
 }
+
+
+
+
