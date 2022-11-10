@@ -11,8 +11,6 @@ var canvas;
 var gl;
 var objType; // 0 - Square pyramid, 1 - Triangle pyramid, 2 - Cube 
 var objTypeLoc;
-var objType2;
-var objTypeLoc2;
 var changeColor = 0; // temp storage
 var changeColorLoc;
 
@@ -32,6 +30,9 @@ var scLoc;
 var sc = 0.2;
 var i = 0;
 
+let ctm;
+let ctmLoc; 
+
 var objID;
 var objIDLoc;
 
@@ -40,6 +41,11 @@ var objCurrentRxRy = [];
 
 var swapColors = false;
 var colorSelectionIndex = [3, 2, 4, 0, 4, 5, 6, 3, 7, 0, 1, 3];
+
+let rox = 0;
+let roy = 0; 
+let roz = 0;
+
 window.onload = function init()
 {
     canvas = document.getElementById("gl-canvas");
@@ -54,14 +60,21 @@ window.onload = function init()
 
     runMainProgram();
 
+    // load vertices and vertex colors
     loadSquarePyramid(numPointsSquarePyramid); 
     loadTrianglePyramid(numPointsTrianglePyramid);
     loadCube(numPointsCube);
 
+    // set up shader variables and attributes
     setUpBufferAndAttrib();
-    getUniformLocations();
+    ctmLoc = gl.getUniformLocation(currentProgram, "ctm" );
+
+    // add event listeners to detect for user keyboard and mouse click
+    // activates either rotation or translation
     addMouseEventListeners();
     addKeyEventListener();
+
+   
     render();
 }
 
@@ -71,9 +84,10 @@ function render()
     // set tx ty based on click id
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    // draw each object instances
-    //objType, objID, sc, numElements, offset, numVertexColors, color offset
-    var objectsToDrawInfo = [
+
+    // draw call information on each object. The following indices represent: 
+    // objType, objID, sc, numElements, offset, numVertexColors, color offset
+    let objectsToDrawInfo = [
         [0, 0, 0.3, numPointsSquarePyramid, 0, colorList[colorSelectionIndex[0]], 5, 0],
         [0, 1, 0.39, numPointsSquarePyramid, 0, colorList[colorSelectionIndex[1]], 5, 0],
         [0, 2, 0.25, numPointsSquarePyramid, 0, colorList[colorSelectionIndex[2]], 5, 0],
@@ -88,10 +102,11 @@ function render()
         [2, 11, 0.15, numPointsCube, 30, colorList[colorSelectionIndex[11]], 17, 9],
     ]
 
+    // draw each object
     for (var i = 0; i < objectsToDrawInfo.length; i++) {
-        
         let [objType, objID, scale, numElements, offset, vertexColors, tNumVertColors, cOffset] = objectsToDrawInfo[i];
 
+        // load specific color for each object
         loadVertexColors(vertexColors, tNumVertColors, cOffset);
         gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
@@ -100,6 +115,7 @@ function render()
     requestAnimationFrame(render);
 }
 
+// create buffers, bind buffer and binds data
 function setUpBufferAndAttrib() {
     var iBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
@@ -123,12 +139,15 @@ function setUpBufferAndAttrib() {
 
 }
 
-function runSelectorProgram() {
-    console.log("using selector program")
-    selectorProgram = initShaders(gl, "s-vertex-shader", "s-fragment-shader");
-    gl.useProgram(selectorProgram);
-    currentProgram = selectorProgram;
-}
+//// CURRENTLY NOT IMPLEMENTED
+// function runSelectorProgram() {
+//     console.log("using selector program")
+//     selectorProgram = initShaders(gl, "s-vertex-shader", "s-fragment-shader");
+//     gl.useProgram(selectorProgram);
+//     currentProgram = selectorProgram;
+// }
+
+// uses the visible program
 function runMainProgram() {
     console.log("using main program")
     mainProgram = initShaders(gl, "vertex-shader", "fragment-shader");
@@ -137,31 +156,16 @@ function runMainProgram() {
 
 }
 
-
-
-function getUniformLocations() {
-  // get uniform locations
-  txLoc = gl.getUniformLocation(currentProgram, 'tx');
-  tyLoc = gl.getUniformLocation(currentProgram, 'ty');
-  objTypeLoc = gl.getUniformLocation(currentProgram, "objType");
-  objTypeLoc2 = gl.getUniformLocation(currentProgram, "objType2");
-  scLoc = gl.getUniformLocation(currentProgram, 'sc');
-  axisRotationLoc = gl.getUniformLocation(currentProgram, "axisRotation");
-  oldThetaLoc = gl.getUniformLocation(currentProgram, "oldTheta");
-  objIDLoc = gl.getUniformLocation(currentProgram, 'objID');
-  idLoc = gl.getUniformLocation(currentProgram, 'id');
-
- changeColorLoc = gl.getUniformLocation(currentProgram, 'changeColor');
-
-}
-
+// draws each object
 function drawObject(objType, objID, sc, numElements, offset) {
-    // check controls to rotate or translate
-
-    // initialize array of empty translation coordinates for each object
+    // translates each object to their initial position, ordered by id 
     if (objCurrentTxTy[objID] == null) {
-        objCurrentTxTy[objID] = [0, 0];
+        let x = ((objID % 4)* 0.45) - 0.65;
+        let y = ((objType - 1) * -0.55);
+        objCurrentTxTy[objID] = [x, y];
+        
     }
+    // sets the initial rotation to zero 
     if (objCurrentRxRy[objID] == null) {
         objCurrentRxRy[objID] = [0, 0, 0];
     }
@@ -169,56 +173,44 @@ function drawObject(objType, objID, sc, numElements, offset) {
     // if obj is picked apply motion
     if (objID == pickedObjID) {
         if (swapColors & (objID == pickedObjID)) {
-            var colorIndex = Math.floor(Math.random() * colorList.length);
+            let colorIndex = Math.floor(Math.random() * colorList.length);
             colorSelectionIndex[pickedObjID] = colorIndex;
-            console.log("pobjid", pickedObjID);
-            console.log("colorSeIndex", colorSelectionIndex[pickedObjID]);
-            console.log(colorSelectionIndex)
             swapColors = false;
         }
+        // calculate translation factor based on mouse move distance
         if (translate & mouseIsDown & isDragging) {
 
-            txtyArr = objCurrentTxTy[objID]; // issue no val
+            txtyArr = objCurrentTxTy[objID]; 
             txtyArr[0] += txFactor;
             txtyArr[1] += tyFactor;
             objCurrentTxTy[objID] = txtyArr;
             txFactor = 0;
             tyFactor = 0;
-
-            console.log("CURRENT TX TY: ", objCurrentTxTy[objID]);
         }
+        // get rotation angle based on direction of mouse rotation
         if (!translate & mouseIsDown & isDragging) {
             objCurrentRxRy[objID] = getRotationAngle(objID);
         }
     }
-    // set tx ty for the obj
-    txtyArr = objCurrentTxTy[objID];
-    tx = txtyArr[0];
-    ty = txtyArr[1];
-  
-    // set axis rotation 
-    axisRotation = objCurrentRxRy[objID];
-    
-    // assign color change
-    // set color change
-    // if (currentProgram == mainProgram) {
-        if (objChangeColor[objID] == null) {
-            objChangeColor[objID] = 0;
-        }
-        changeColor = objChangeColor[objID];
-        gl.uniform1i(changeColorLoc, changeColor);
-    // }
-    id = objID;
-    // set uniforms
-    gl.uniform1f(txLoc, tx);
-    gl.uniform1f(tyLoc, ty);
-    gl.uniform1f(scLoc, sc);
-    gl.uniform3fv(axisRotationLoc, axisRotation);
-    gl.uniform1i(objTypeLoc, objType);
-    gl.uniform1i(objTypeLoc2, objType2);
-    gl.uniform1i(objIDLoc, objID);
-    gl.uniform1i(idLoc, id);
+    else {
+        // set default rotation when user is not controlling rotation
+        roy += -0.05;
+        objCurrentRxRy[objID] = [0, roy, 0];
+    }
 
+    // save translation factor for the current object for next render
+    txtyArr = objCurrentTxTy[objID];
+    tx = txtyArr[0] || 0;
+    ty = txtyArr[1] || 0;
+    axisRotation = objCurrentRxRy[objID];
+    // calculations current translation matrix to be sent to shader
+    let tm = calcTranslationMat(tx, ty, objID, objType);
+    let rm = calcRotationMat(axisRotation);
+    let sm = calcScaleMat(sc);
+    ctm = calcCtm(tm, sm, rm);
+    gl.uniformMatrix4fv(ctmLoc, false, flatten(ctm));
+
+    // draw object
     gl.drawElements(gl.TRIANGLES, numElements, gl.UNSIGNED_BYTE, offset);
 
 } 
