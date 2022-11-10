@@ -38,9 +38,10 @@ var objIDLoc;
 
 var objCurrentTxTy = [];
 var objCurrentRxRy = [];
+var objCurrentColor = [3, 2, 4, 0, 4, 5, 6, 3, 7, 0, 1, 3]; // initial colors, will later store new colors
 
 var swapColors = false;
-var colorSelectionIndex = [3, 2, 4, 0, 4, 5, 6, 3, 7, 0, 1, 3];
+// var colorSelectionIndex = [3, 2, 4, 0, 4, 5, 6, 3, 7, 0, 1, 3];
 
 let rox = 0;
 let roy = 0; 
@@ -88,18 +89,18 @@ function render()
     // draw call information on each object. The following indices represent: 
     // objType, objID, sc, numElements, offset, numVertexColors, color offset
     let objectsToDrawInfo = [
-        [0, 0, 0.3, numPointsSquarePyramid, 0, colorList[colorSelectionIndex[0]], 5, 0],
-        [0, 1, 0.39, numPointsSquarePyramid, 0, colorList[colorSelectionIndex[1]], 5, 0],
-        [0, 2, 0.25, numPointsSquarePyramid, 0, colorList[colorSelectionIndex[2]], 5, 0],
-        [0, 3, 0.25, numPointsSquarePyramid, 0, colorList[colorSelectionIndex[3]], 5, 0],
-        [1, 4, 0.2, numPointsTrianglePyramid, 18, colorList[colorSelectionIndex[4]], 9, 4],
-        [1, 5, 0.75, numPointsTrianglePyramid, 18, colorList[colorSelectionIndex[5]], 9, 4],
-        [1, 6, 0.3, numPointsTrianglePyramid, 18, colorList[colorSelectionIndex[6]], 9, 4],
-        [1, 7, 0.60, numPointsTrianglePyramid, 18, colorList[colorSelectionIndex[7]], 9, 4],
-        [2, 8, 0.2, numPointsCube, 30, colorList[colorSelectionIndex[8]], 17, 9],
-        [2, 9, 0.30, numPointsCube, 30, colorList[colorSelectionIndex[9]], 17, 9],
-        [2, 10, 0.25, numPointsCube, 30, colorList[colorSelectionIndex[10]], 17, 9],
-        [2, 11, 0.15, numPointsCube, 30, colorList[colorSelectionIndex[11]], 17, 9],
+        [0, 0, 0.3, numPointsSquarePyramid, 0, colorList[objCurrentColor[0]], 5, 0],
+        [0, 1, 0.39, numPointsSquarePyramid, 0, colorList[objCurrentColor[1]], 5, 0],
+        [0, 2, 0.25, numPointsSquarePyramid, 0, colorList[objCurrentColor[2]], 5, 0],
+        [0, 3, 0.25, numPointsSquarePyramid, 0, colorList[objCurrentColor[3]], 5, 0],
+        [1, 4, 0.2, numPointsTrianglePyramid, 18, colorList[objCurrentColor[4]], 9, 4],
+        [1, 5, 0.75, numPointsTrianglePyramid, 18, colorList[objCurrentColor[5]], 9, 4],
+        [1, 6, 0.3, numPointsTrianglePyramid, 18, colorList[objCurrentColor[6]], 9, 4],
+        [1, 7, 0.60, numPointsTrianglePyramid, 18, colorList[objCurrentColor[7]], 9, 4],
+        [2, 8, 0.2, numPointsCube, 30, colorList[objCurrentColor[8]], 17, 9],
+        [2, 9, 0.30, numPointsCube, 30, colorList[objCurrentColor[9]] , 17, 9],
+        [2, 10, 0.25, numPointsCube, 30, colorList[objCurrentColor[10]] , 17, 9],
+        [2, 11, 0.15, numPointsCube, 30, colorList[objCurrentColor[11]] , 17, 9],
     ]
 
     // draw each object
@@ -174,7 +175,7 @@ function drawObject(objType, objID, sc, numElements, offset) {
     if (objID == pickedObjID) {
         if (swapColors & (objID == pickedObjID)) {
             let colorIndex = Math.floor(Math.random() * colorList.length);
-            colorSelectionIndex[pickedObjID] = colorIndex;
+            objCurrentColor[pickedObjID] = colorIndex;
             swapColors = false;
         }
         // calculate translation factor based on mouse move distance

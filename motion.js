@@ -55,12 +55,15 @@ function addMouseEventListeners() {
     // listens for user click and gets object id
     canvas.addEventListener('mousedown', (event) => {
         mouseIsDown = true;
-        pickedObjID = document.getElementById("options").value;
-
+        // pickedObjID = document.getElementById("options").value;
     })
+    var options =  document.getElementById('options')
+    options.onchange = () => {
+        pickedObjID = options.value;
+    }
     // listens for when to stop translation and rotation
     canvas.addEventListener('mouseup', (event) => {
-        mouseIsDown = false;
+        mouseIsDown = false; 
         isDragging = false;
     })
 }
