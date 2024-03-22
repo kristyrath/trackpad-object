@@ -1,4 +1,3 @@
 # Object Color Picking, Translation and Rotation
-<img width="553" alt="Screenshot 2024-03-22 at 5 13 29 PM" src="https://github.com/kristyrath/trackpad-object/assets/88480572/2849a61a-dec2-4bcc-9cfc-245ec7b6e868">
 
-
+![Untitled design (5)](https://github.com/kristyrath/trackpad-object/assets/88480572/2ce03462-5c86-41b9-8942-ecb23362532e)
